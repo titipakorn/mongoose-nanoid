@@ -3,9 +3,9 @@ const nanoid = require('nanoid/generate');
 function nanoidPlugin(schema, options) {
   if (schema.options._id !== undefined && schema.options._id === false) return;
 
-  length = options.length || 12;
+  length = (options && options.length) || 12;
 
-  customAlpha = options.customAlpha || '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  customAlpha = (options && options.customAlpha) || '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
   let _id = '_id';
   const dataObj = {};
