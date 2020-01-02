@@ -1,40 +1,41 @@
-const nanoid = require('nanoid');
+const nanoid = require('nanoid/generate');
 
-function nanoidPlugin(schema, length) {
-    if (schema.options._id !== undefined && schema.options._id === false) return;
+function nanoidPlugin(schema, customAlpha, length) {
+  if (schema.options._id !== undefined && schema.options._id === false) return;
 
-    length = length || 12;
+  length = length || 12;
 
-    let _id = '_id';
-    const dataObj = {};
+  customAlpha = customAlpha || '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-    dataObj[_id] = {
-        type: String,
-        default: function () {
-            return nanoid(length)
-        }
-    };
+  let _id = '_id';
+  const dataObj = {};
 
-    schema.add(dataObj);
-    schema.pre('save', function (next) {
-        if (this.isNew && !this.constructor.$isArraySubdocument) {
-            attemptToGenerate(this, length)
-                .then(function (newId) {
-                    this[_id] = newId;
-                    next()
-                })
-                .catch(next)
-        } else next();
-    });
+  dataObj[_id] = {
+    type: String,
+    default: function() {
+      return nanoid(customAlpha, length);
+    },
+  };
+
+  schema.add(dataObj);
+  schema.pre('save', function(next) {
+    if (this.isNew && !this.constructor.$isArraySubdocument) {
+      attemptToGenerate(this, customAlpha, length)
+        .then(function(newId) {
+          this[_id] = newId;
+          next();
+        })
+        .catch(next);
+    } else next();
+  });
 }
 
-function attemptToGenerate(doc, length) {
-    const id = nanoid(length);
-    return doc.constructor.findById(id)
-        .then(function (found) {
-            if (found) return attemptToGenerate(doc, length);
-            return id
-        })
+function attemptToGenerate(doc, customAlpha, length) {
+  const id = nanoid(customAlpha, length);
+  return doc.constructor.findById(id).then(function(found) {
+    if (found) return attemptToGenerate(doc, length);
+    return id;
+  });
 }
 
 module.exports = nanoidPlugin;
