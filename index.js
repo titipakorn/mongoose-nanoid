@@ -33,7 +33,7 @@ function nanoidPlugin(schema, options) {
 function attemptToGenerate(doc, customAlpha, length) {
   const id = nanoid(customAlpha, length);
   return doc.constructor.findById(id).then(function(found) {
-    if (found) return attemptToGenerate(doc, length);
+    if (found) return attemptToGenerate(doc, customAlpha, length);
     return id;
   });
 }
